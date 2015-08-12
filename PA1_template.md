@@ -18,7 +18,8 @@ analyses with code in the following manner :-
 Before diving to the assignment detail, let first consier the packages which are
 loaded for onward calculation.
 
-```{r load_packages, echo = TRUE, message=FALSE, warning=FALSE}
+
+```r
 library(lubridate)
 library(dplyr)
 library(ggplot2)
@@ -32,7 +33,8 @@ In this step the data is loaded from the HDD in csv format and the Factor is
 converted to simple vectors. The **date** variable in the data is converted to
 *date type* using *lubridate package*.
 
-```{r load_data, echo = TRUE}
+
+```r
 setwd("E:/Hamza/Coursera/Reproducable Research/Assignment 1")
 
 movData <- read.csv("activity.csv", sep = ",", stringsAsFactors = FALSE)
@@ -46,17 +48,22 @@ The total number of steps is calculted by using *aggregate* function for
 each day that is stored in **stepsDays** and then their histogram is plotted that
 shows the distrubtion of data over x-axis.
 
-```{r mean_steps/day, echo = TRUE, fig.height=4}
+
+```r
 stepsDays <- aggregate(steps~date, data = movData, FUN = sum)
 hist(stepsDays$steps, main = "Actual Values", xlab = "Total No of Steps")
+```
 
+![plot of chunk mean_steps/day](figure/mean_steps/day-1.png) 
+
+```r
 #mean and meadian of total number of steps
 meanStep <- mean(stepsDays$steps)
 medainStep <- median(stepsDays$steps)
 ```
 
-The mean and median of steps taken per day is found to be **`r meanStep`** and
-**`r medainStep`** respectively.
+The mean and median of steps taken per day is found to be **1.0766189 &times; 10<sup>4</sup>** and
+**10765** respectively.
 
 
 ###*3. Average Daily Activity Patern:*
@@ -65,15 +72,25 @@ For this problem the 5 minute interval is taken on x-axis; where for each interv
 the mean of all days form October to November is calculted and is plotted on y-axis
 against interval value constructing a time series plot.
 
-```{r average_activity, echo = TRUE, fig.height=4}
+
+```r
 avgStep <- aggregate(steps~interval, data = movData, FUN = mean)
 
 g <- ggplot(data = avgStep, aes(interval,steps))
 g + geom_line(type = "l") + xlab("Time Interval (CEST)") + ylab("Avg No. of Steps") +
        scale_x_continuous(breaks=c(0,600,1200,1800,2400),
                           labels = c("00:00", "06:00", "12:00", "18:00", "24:00"))
+```
 
+![plot of chunk average_activity](figure/average_activity-1.png) 
+
+```r
 (filter(avgStep, avgStep$steps == max(avgStep$steps)))
+```
+
+```
+##   interval    steps
+## 1      835 206.1698
 ```
 It can be seen in the result that at interval equal to **835**  the steps has maximum value **206.16**
 
@@ -89,8 +106,8 @@ there are two strategies which are considered to fill the missing values with.
        * This treatment is considered for the above problem mentioned before; which results
        in replacing value having about same weightage over time.
 
-```{r missing_value, echo=TRUE}
 
+```r
 lmv <- length(movData$steps[is.na(movData$steps)])
 
 # The strategy is carried out by calculating the mean of all values for each interval using
@@ -106,31 +123,45 @@ for(i in naV$interval){
               valRep$steps[valRep$interval==i]
 }
 ```
-The total number of missing values in the data set is found to be **`r lmv`**.
+The total number of missing values in the data set is found to be **2304**.
 Again, the total number of steps taken each day with filled value dataset is calculted.
 and their histogram is plotted.
-```{r hist_missingval, echo = TRUE, fig.height=4}
 
+```r
 stepsDays2 <- aggregate(steps~date, data = fillData, FUN = sum)
 
 hist(stepsDays2$steps, main = "Filled Values", xlab = "Total No of Steps")
+```
 
+![plot of chunk hist_missingval](figure/hist_missingval-1.png) 
+
+```r
 meanStep2 <- mean(stepsDays2$steps)
 medainStep2 <- median(stepsDays2$steps)
-
 ```
 For comparison the actual and filled data set total steps are drawn on histogram and 
 comparision result values are shown in table
-```{r comparision_missingval, echo = TRUE, fig.height=4}
+
+```r
 namedVal <- rbind(c(meanStep, meanStep2),c(medainStep,medainStep2))
 colnames(namedVal)<- c("Actual Val", "Filled Val")
 rownames(namedVal) <- c("mean", "median")                 
 namedVal
+```
 
+```
+##        Actual Val Filled Val
+## mean     10766.19   10766.19
+## median   10765.00   10766.19
+```
+
+```r
 par(mfrow= c(1,2))
 hist(stepsDays$steps, main = "Actual Values", xlab = "Total No of Steps")
 hist(stepsDays2$steps, main = "Filled Values", xlab = "Total No of Steps")
 ```
+
+![plot of chunk comparision_missingval](figure/comparision_missingval-1.png) 
 
 It can be interpurated from the results that median is slightly changed. whereas 
 mean remained same. Whereas, looking at the histogram it can clearly be seen that
@@ -143,7 +174,8 @@ there is dramastic change in frequency values.
 The treated data (removed missing values) is factored into two values *weekdays*
 and *weekend* and then each of two levles the average values of steps are 
 calculted and plotted accordingly.
-```{r comparison_week, echo=TRUE}
+
+```r
 # the weekday value are factored in two level from 0-5 and 5-7.
 # and marked as weekdays and weekend which are stored in new variable "week".
 fillData$Week <- cut(wday(fillData$date),c(0,5,7),labels = c("weekdays", "Weekend"))
@@ -156,3 +188,5 @@ g + geom_line(type = "l", color = "blue") + facet_grid(Week~.) +
        scale_x_continuous(breaks=c(0,600,1200,1800,2400),
                           labels = c("00:00", "06:00", "12:00", "18:00", "24:00"))
 ```
+
+![plot of chunk comparison_week](figure/comparison_week-1.png) 
